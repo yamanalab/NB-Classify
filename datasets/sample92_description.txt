@@ -1,0 +1,12 @@
+Below is the list of class labels and feature values per attribute
+
+Labels: "A", "B"
+
+Attribute 1: Discrete values from 0 to 19
+Attribute 2: Discrete values from 0 to 19
+Attribute 3: Discrete values from 0 to 14
+Attribute 4: Discrete values from 0 to 9
+Attribute 5: Discrete values from 0 to 7
+Attribute 6: Discrete values from 0 to 7
+Attribute 7: Discrete values from 0 to 7
+Attribute 8: "T", "F"

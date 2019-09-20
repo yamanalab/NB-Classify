@@ -1,0 +1,15 @@
+Below is the list of class labels and feature values per attribute
+
+Labels: "A", "B", "C", "D"
+
+Attribute 1: "0", "1", "2", "3", "4", "5", "6", "7"
+Attribute 2: "0", "1", "2", "3", "4"
+Attribute 3: "0", "1", "2", "3", "4"
+Attribute 4: "S", "M", "L", "XL"
+Attribute 5: "0", "1", "2", "3", "4", "5"
+Attribute 6: "T", "F"
+Attribute 7: "T", "F"
+Attribute 8: "0", "1", "2", "3", "4"
+Attribute 9: "0", "1", "2", "3", "4"
+Attribute 10: "0", "1", "2", "3", "4"
+Attribute 11: "short", "med", "long"

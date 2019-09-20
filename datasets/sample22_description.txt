@@ -1,0 +1,7 @@
+Below is the list of class labels and feature values per attribute
+
+Labels: "A", "B", "C", "D"
+
+Attribute 1: "1", "2", "3", "4", "5", "6", "7", "8"
+Attribute 2: "1", "2", "3", "4", "5", "6", "7"
+Attribute 3: "XS", "S", "M", "L", "XL", "XXL"

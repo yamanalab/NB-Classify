@@ -51,9 +51,13 @@ int main(int argc, char **argv)
 
     ///////////////////////////////////////////////////////////////////////
 
-    cout << "Please input the name of your dataset" << endl;
-    string dataset;
-    cin >> dataset;
+    cout << "Please input the name of your test dataset" << endl;
+    string file;
+    cin >> file;
+
+    int pos = file.find("_");
+    string dataset = file.substr(0, pos);
+    cout << dataset << endl;
 
     cout << "Reading model" << endl;
 
@@ -95,7 +99,7 @@ int main(int argc, char **argv)
     ////////////////////////////////////////////////////////////////////////////
 
     cout << "Reading data" << endl;
-    string test_filename = "datasets/"+dataset+"_test.csv";
+    string test_filename = "datasets/"+file+"_test.csv";
     vector <vector <string> > orig_data = readData(test_filename);
     cout << "Finished reading in data" << endl;
 
