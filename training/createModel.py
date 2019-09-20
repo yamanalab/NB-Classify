@@ -41,7 +41,7 @@ print(cond_prob)
 
 
 
-filename = 'datasets/sample' + str(total) + '_basemodel.csv'
+filename = 'datasets/sample' + str(total+1) + '_basemodel.csv'
 with open(filename, 'w') as csvfile:
     f = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
 
@@ -52,7 +52,7 @@ with open(filename, 'w') as csvfile:
             f.writerow(data)
 
 
-filename = 'datasets/sample' + str(total) + '_info.csv'
+filename = 'datasets/sample' + str(total+1) + '_info.csv'
 with open(filename, 'w') as csvfile:
     f = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
 
