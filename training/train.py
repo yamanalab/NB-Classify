@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import csv
 import json
 import math
@@ -69,57 +71,66 @@ def calc_model(data, scale, attributes = []):
     return cond_prob
 
 
-print("Input name of data set")
-dataName = input()
-filename = '../datasets/' + dataName + '_train.csv'
-train = loadCsv(filename)
-print('Loaded data file {0} with {1} rows'.format(filename, len(train)))
+def run(infofile, trainfile, outname):
+    train = loadCsv(trainfile)
+    print('Loaded data file {0} with {1} rows'.format(trainfile, len(train)))
 
-dataInfoFilename = '../datasets/' + dataName + '_info.csv'
-dataInfo = loadCsv(dataInfoFilename)
-class_names = dataInfo[0]
-attribute_values = dataInfo[1:]
-print("Loaded information on data set")
+    dataInfo = loadCsv(infofile)
+    class_names = dataInfo[0]
+    attribute_values = dataInfo[1:]
+    print("Loaded information on data set")
+    
+    print("Probabilities will be represented as an integer from 0 to N.")
+    print("Please input N.")
+    scale = int(input())
 
-print("Probabilities will be represented as an integer from 0 to N.")
-print("Please input N.")
-scale = int(input())
+    categorized_train = categorize_data(train)
+    class_prob = {}
+    for key in categorized_train:
+        class_prob[key] = len(categorized_train[key])/len(train)
 
-categorized_train = categorize_data(train)
-class_prob = {}
-for key in categorized_train:
-    class_prob[key] = len(categorized_train[key])/len(train)
+    # Trains a model that is not logged or scaled. For testing performance of regular model
+    trained_model={}
+    trained_model['class_prob']=class_prob
+    trained_model['cond_prob'] = calc_model(categorized_train, scale)
+    modelFilename = outname + '_model_orig.json'
+    with open(modelFilename, 'w') as outfile:
+        json.dump(trained_model, outfile, indent=4)
+    
+    
+    # Trains a model that is logged, scaled then represented as integers
+    intModel = {}
+    intClassProb = {}
+    c = -int(math.log(3.7e-4)*10)  # Value later used to "lift" the logged probabilities so that they will be positive
+    for key in categorized_train:
+        temp = len(categorized_train[key])/len(train)
+        intClassProb[key] = int(((math.log(temp) * 10) + c)/c*scale)
+    intModel['class_prob'] = intClassProb
+    intModel['cond_prob'] = calc_model(categorized_train, scale, attribute_values)
+    
+    # For checking performance and accuracy of the trained model over plaintext
+    with open(outname + '_model.json', 'w') as outfile:
+        json.dump(intModel, outfile, indent=4)
+    
+    # What will actually be encrypted by FHE
+    with open(outname + '_model.csv', 'w') as csvfile:
+        f = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
+    
+        f.writerow([intModel['class_prob'][i] for i in class_names])
+        cond_prob = intModel['cond_prob']
+        for c in class_names:
+            f.writerow([])
+            for i in range(len(cond_prob[c])):
+                f.writerow([cond_prob[c][i][value] for value in attribute_values[i]])
+    
 
-# Trains a model that is not logged or scaled. For testing performance of regular model
-trained_model={}
-trained_model['class_prob']=class_prob
-trained_model['cond_prob'] = calc_model(categorized_train, scale)
-modelFilename = '../datasets/' + dataName + '_model_orig.json'
-with open(modelFilename, 'w') as outfile:
-    json.dump(trained_model, outfile, indent=4)
+if __name__ == '__main__':
+    import argparse
+    ap = argparse.ArgumentParser(description=u"train")
+    ap.add_argument("-i", "--infofile", help="info filepath")
+    ap.add_argument("-t", "--trainfile", help="train filepath")
+    ap.add_argument("-o", "--outname", default="sample", help="output name")
+    args = ap.parse_args()
 
+    run(args.infofile, args.trainfile, args.outname)
 
-# Trains a model that is logged, scaled then represented as integers
-intModel = {}
-intClassProb = {}
-c = -int(math.log(3.7e-4)*10)  # Value later used to "lift" the logged probabilities so that they will be positive
-for key in categorized_train:
-    temp = len(categorized_train[key])/len(train)
-    intClassProb[key] = int(((math.log(temp) * 10) + c)/c*scale)
-intModel['class_prob'] = intClassProb
-intModel['cond_prob'] = calc_model(categorized_train, scale, attribute_values)
-
-# For checking performance and accuracy of the trained model over plaintext
-with open('../datasets/' + dataName + '_model.json', 'w') as outfile:
-    json.dump(intModel, outfile, indent=4)
-
-# What will actually be encrypted by FHE
-with open('../datasets/' + dataName + '_model.csv', 'w') as csvfile:
-    f = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
-
-    f.writerow([intModel['class_prob'][i] for i in class_names])
-    cond_prob = intModel['cond_prob']
-    for c in class_names:
-        f.writerow([])
-        for i in range(len(cond_prob[c])):
-            f.writerow([cond_prob[c][i][value] for value in attribute_values[i]])

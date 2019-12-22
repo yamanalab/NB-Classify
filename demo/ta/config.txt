@@ -1,0 +1,7 @@
+fheM = 11119
+fheL = 180
+fheP = 2
+fheR = 18
+fheC = 3
+fheW = 64
+fheD = 0
