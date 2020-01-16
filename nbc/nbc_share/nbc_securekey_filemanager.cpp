@@ -54,7 +54,7 @@ struct SecureKeyFileManager::Impl
         filenames_.emplace(kKindSecKey,  seckey_filename);
         filenames_.emplace(kKindContext, context_filename);
     }
-    
+
     Impl(const std::string& pubkey_filename,
          const std::string& seckey_filename,
          const std::string& context_filename,
@@ -82,7 +82,7 @@ struct SecureKeyFileManager::Impl
         filenames_.emplace(kKindSecKey,  seckey_filename);
         filenames_.emplace(kKindContext, context_filename);
     }
-    
+
     ~Impl(void) = default;
 
     void initialize(void)
@@ -94,7 +94,7 @@ struct SecureKeyFileManager::Impl
         secretKey.GenSecKey(w_);
         helib::addSome1DMatrices(secretKey);
         STDSC_LOG_INFO("Generated the secret key for FHE.");
-        
+
         double security = context.securityLevel();
         long slots = context.zMStar.getNSlots();
 
@@ -122,7 +122,7 @@ struct SecureKeyFileManager::Impl
     {
         return nbc_share::utility::file_size(filename(kind));
     }
-    
+
     void data(const Kind_t kind, void* buffer)
     {
         size_t sz = size(kind);
@@ -139,7 +139,7 @@ struct SecureKeyFileManager::Impl
             STDSC_LOG_DEBUG("read %s", filenames_[kind].c_str());
         }
     }
-    
+
     bool is_exist(const Kind_t kind) const
     {
         std::ifstream ifs(filename(kind));

@@ -24,8 +24,8 @@
 
 namespace helib
 {
-    class FHEcontext;
-    class FHESecKey;
+    using FHEcontext = class Context;
+    using FHESecKey  = class SecKey;
 }
 
 namespace nbc_share
@@ -44,7 +44,7 @@ struct SecKey
 
     void save_to_file(const std::string& filepath) const;
     void load_from_file(const std::string& filepath);
-    
+
     const helib::FHESecKey& get(void) const;
 
 private:
