@@ -9,7 +9,7 @@ The library also provides a program for training your classification model and w
 * glibc 2.23
 * g++ 5.4.0
 * cmake 3.5
-* [HElib](https://github.com/homenc/HElib)
+* [HElib](https://github.com/homenc/HElib/tree/1.0.0-beta2-Nov2019) tag: 1.0.0-beta2-Nov2019
 * doxygen (to generate documentation)
 * xterm (to run demo app using `demo.sh`)
 
