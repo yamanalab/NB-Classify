@@ -21,12 +21,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
-
-namespace helib
-{
-    using FHEcontext = class Context;
-    using FHEPubKey  = class PubKey;
-}
+#include <nbc_share/nbc_helib_type.hpp>
 
 namespace nbc_share
 {

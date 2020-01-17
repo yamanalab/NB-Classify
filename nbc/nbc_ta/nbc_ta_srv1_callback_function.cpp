@@ -42,8 +42,10 @@ DEFUN_DOWNLOAD(CallbackFunctionPubkeyRequest)
     STDSC_LOG_INFO("Received public key request. (current state : %s)",
                    state.current_state_str().c_str());
 
+    DEF_CDATA_ON_EACH(nbc_ta::CallbackParam);
+
     auto  kind = nbc_share::SecureKeyFileManager::Kind_t::kKindPubKey;
-    auto& skm  = *param_.skm_ptr;
+    auto& skm  = *cdata_e->skm_ptr;
     stdsc::Buffer pubkey(skm.size(kind));
     skm.data(kind, pubkey.data());
     STDSC_LOG_INFO("Sending public key.");
@@ -59,8 +61,10 @@ DEFUN_DOWNLOAD(CallbackFunctionContextRequest)
     STDSC_LOG_INFO("Received context request. (current state : %s)",
                    state.current_state_str().c_str());
 
+    DEF_CDATA_ON_EACH(nbc_ta::CallbackParam);
+
     auto  kind = nbc_share::SecureKeyFileManager::Kind_t::kKindContext;
-    auto& skm  = *param_.skm_ptr;
+    auto& skm  = *cdata_e->skm_ptr;
     stdsc::Buffer context(skm.size(kind));
     skm.data(kind, context.data());
     STDSC_LOG_INFO("Sending context.");
@@ -76,8 +80,10 @@ DEFUN_UPDOWNLOAD(CallbackFunctionResultRequest)
     STDSC_LOG_INFO("Received result request. (current state : %s)",
                    state.current_state_str().c_str());
 
+    DEF_CDATA_ON_EACH(nbc_ta::CallbackParam);
+
     auto session_id = *reinterpret_cast<const int32_t*>(buffer.data());
-    auto& session_container = *param_.sc_ptr;
+    auto& session_container = *cdata_e->sc_ptr;
 
     if (!session_container.has_context(session_id)) {
         std::ostringstream oss;

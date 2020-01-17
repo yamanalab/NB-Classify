@@ -73,15 +73,19 @@ private:
  */
 struct StateSessionCreated : public stdsc::State
 {
-    static std::shared_ptr<stdsc::State> create(const bool model_received   = false,
-                                                const bool input_received   = false,
+    static std::shared_ptr<stdsc::State> create(const bool input_received   = false,
                                                 const bool permvec_received = false);
-    StateSessionCreated(const bool model_received   = false,
-                        const bool input_received   = false,
+    StateSessionCreated(const bool input_received   = false,
                         const bool permvec_received = false);
     virtual void set(stdsc::StateContext &sc, uint64_t event) override;
     STDSC_STATE_DEFID(kStateSessionCreated);
 
+    static bool& s_model_received(void)
+    {
+        static bool s_model_received = false;
+        return s_model_received;
+    }
+    
 private:
     struct Impl;
     std::shared_ptr<Impl> pimpl_;

@@ -47,11 +47,6 @@ DECLARE_DATA_CLASS(CallbackFunctionEncModel);
  */
 DECLARE_DATA_CLASS(CallbackFunctionEncInput);
 
-///**
-// * @brief Provides callback function in receiving perm vector.
-// */
-//DECLARE_DATA_CLASS(CallbackFunctionPermVec);
-
 /**
  * @brief Provides callback function in receiving compute request.
  */

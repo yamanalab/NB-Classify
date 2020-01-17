@@ -34,6 +34,7 @@ class Client;
     
 /**
  * @brief This class is used to hold the callback parameters for Server#1 on CS.
+ * This parameter to shared on each connections.
  */
 struct CallbackParam
 {
@@ -49,13 +50,21 @@ struct CallbackParam
     nbc_cs::Client& get_client(void);
     
     std::shared_ptr<nbc_share::EncData> encdata_ptr;
-    std::shared_ptr<nbc_share::EncData> encmodel_ptr;
     std::shared_ptr<nbc_share::PermVec> permvec_ptr;
     
     std::vector<long> permvec;
 private:
     struct Impl;
     std::shared_ptr<Impl> pimpl_;
+};
+
+/**
+ * @brief This class is used to hold the callback parameters for Server#1 on CS.
+ * This parameter to shared on all connections.
+ */
+struct CommonCallbackParam
+{
+    std::shared_ptr<nbc_share::EncData> encmodel_ptr;
 };
 
 } /* namespace nbc_cs */

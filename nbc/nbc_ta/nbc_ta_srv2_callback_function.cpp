@@ -128,13 +128,15 @@ DEFUN_DATA(CallbackFunctionBeginComputation)
          kStateComputing == state.current_state()),
         "Warn: must be session created or computing state to receive begin computation.");
 
+    DEF_CDATA_ON_EACH(nbc_ta::CallbackParam);
+    
     const auto* p = reinterpret_cast<const uint8_t*>(buffer.data());
     auto session_id   = *reinterpret_cast<const int32_t*>(p + 0);
     auto compute_unit = *reinterpret_cast<const size_t*>(p + sizeof(int32_t));
     STDSC_LOG_DEBUG("session_id:%d, compute_unit:%lu", session_id, compute_unit);
-    param_.sc_ptr->initialize(session_id, compute_unit);
+    cdata_e->sc_ptr->initialize(session_id, compute_unit);
 
-    param_.compute_unit = compute_unit;
+    cdata_e->compute_unit = compute_unit;
     
     state.set(kEventBeginRequest);
 }
@@ -148,9 +150,11 @@ DEFUN_UPDOWNLOAD(CallbackFunctionCompute)
         kStateComputable <= state.current_state(),
         "Warn: must be computable state to receive compute request.");
 
-    const auto& context = *param_.context_ptr;
-    const auto& pubkey  = *param_.pubkey_ptr;
-    const auto& seckey  = *param_.seckey_ptr;
+    DEF_CDATA_ON_EACH(nbc_ta::CallbackParam);
+
+    const auto& context = *cdata_e->context_ptr;
+    const auto& pubkey  = *cdata_e->pubkey_ptr;
+    const auto& seckey  = *cdata_e->seckey_ptr;
     
     stdsc::BufferStream upbuffstream(buffer);
     std::iostream upstream(&upbuffstream);
@@ -171,25 +175,20 @@ DEFUN_UPDOWNLOAD(CallbackFunctionCompute)
                    cparam.compute_unit,
                    cparam.session_id);
 
-    long num_slots = param_.context_ptr->get().zMStar.getNSlots();
+    long num_slots = cdata_e->context_ptr->get().zMStar.getNSlots();
     std::vector<long> vec_b(num_slots);
 
-    long   plain_mod    = param_.skm_ptr->plain_mod();
-    auto&  indexes      = param_.sc_ptr->get(cparam.session_id).get_results();
-    size_t compute_unit = param_.compute_unit;
-//#if defined(USE_MULTI)
-    // ここから koko
-//#else
-    //std::vector<long> last_indexes(1, indexes[0]);
+    long   plain_mod    = cdata_e->skm_ptr->plain_mod();
+    auto&  indexes      = cdata_e->sc_ptr->get(cparam.session_id).get_results();
+    size_t compute_unit = cdata_e->compute_unit;
+
     std::vector<long> last_indexes(indexes);
-//#endif
 
     nbc_share::EncData enc_diff(pubkey);
     enc_diff.push(ct_diff);
     auto new_indexes = compute(enc_diff, cparam, context, seckey,
                                plain_mod, last_indexes, compute_unit, vec_b);
-    //param_.sc_ptr->set_result(cparam.session_id, new_index);
-    param_.sc_ptr->set_results(cparam.session_id, new_indexes);
+    cdata_e->sc_ptr->set_results(cparam.session_id, new_indexes);
 
     nbc_share::EncData dst_encdata(pubkey);
     dst_encdata.encrypt(vec_b, context);
@@ -216,8 +215,10 @@ DEFUN_DATA(CallbackFunctionEndComputation)
          kStateComputing  == state.current_state()),
         "Warn: must be computable or computing state to receive begin computation.");
 
+    DEF_CDATA_ON_EACH(nbc_ta::CallbackParam);
+    
     auto session_id = *reinterpret_cast<const int32_t*>(buffer.data());
-    param_.sc_ptr->set_computed(session_id);
+    cdata_e->sc_ptr->set_computed(session_id);
 
     STDSC_LOG_DEBUG("end computation: session_id:%d", session_id);
 

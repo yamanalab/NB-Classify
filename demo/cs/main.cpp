@@ -65,36 +65,38 @@ static void exec(const Option& opt)
     stdsc::StateContext state1(std::make_shared<nbc_cs::srv1::StateReady>());
 
     stdsc::CallbackFunctionContainer callback1;
-    nbc_cs::CallbackParam cb_param;
+    nbc_cs::CallbackParam param;
+    nbc_cs::CommonCallbackParam cparam;
     {        
-        cb_param.pubkey_filename   = PUBKEY_FILENAME;
-        cb_param.context_filename  = CONTEXT_FILENAME;
-        cb_param.encdata_filename  = ENCDATA_FILENAME;
-        cb_param.encmodel_filename = ENCMODEL_FILENAME;
+        param.pubkey_filename   = PUBKEY_FILENAME;
+        param.context_filename  = CONTEXT_FILENAME;
+        param.encdata_filename  = ENCDATA_FILENAME;
+        param.encmodel_filename = ENCMODEL_FILENAME;
         
         std::shared_ptr<nbc_cs::Client> client(
             new nbc_cs::Client(host, PORT_TA_SRV1, PORT_TA_SRV2));
-        cb_param.set_client(client);
+        param.set_client(client);
         
         std::shared_ptr<stdsc::CallbackFunction> cb_session(
-            new nbc_cs::srv1::CallbackFunctionSessionCreate(cb_param));
+            new nbc_cs::srv1::CallbackFunctionSessionCreate());
         callback1.set(nbc_share::kControlCodeDownloadSessionID, cb_session);
         
         std::shared_ptr<stdsc::CallbackFunction> cb_model(
-            new nbc_cs::srv1::CallbackFunctionEncModel(cb_param));
+            new nbc_cs::srv1::CallbackFunctionEncModel());
         callback1.set(nbc_share::kControlCodeDataModel, cb_model);
         
         std::shared_ptr<stdsc::CallbackFunction> cb_input(
-            new nbc_cs::srv1::CallbackFunctionEncInput(cb_param));
+            new nbc_cs::srv1::CallbackFunctionEncInput());
         callback1.set(nbc_share::kControlCodeDataInput, cb_input);
 
-//        std::shared_ptr<stdsc::CallbackFunction> cb_permvec(
-//            new nbc_cs::srv1::CallbackFunctionPermVec(cb_param));
-//        callback1.set(nbc_share::kControlCodeDataPermVec, cb_permvec);
-        
         std::shared_ptr<stdsc::CallbackFunction> cb_compute(
-            new nbc_cs::srv1::CallbackFunctionComputeRequest(cb_param));
+            new nbc_cs::srv1::CallbackFunctionComputeRequest());
         callback1.set(nbc_share::kControlCodeDataCompute, cb_compute);
+
+        callback1.set_commondata(static_cast<void*>(&param), sizeof(param),
+                                 stdsc::kCommonDataOnEachConnection);
+        callback1.set_commondata(static_cast<void*>(&cparam), sizeof(cparam),
+                                 stdsc::kCommonDataOnAllConnection);
     }
 
     std::shared_ptr<nbc_cs::srv1::CSServer> server1

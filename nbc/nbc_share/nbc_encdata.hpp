@@ -34,7 +34,7 @@ class SecKey;
 class Context;
     
 /**
- * @brief This clas is used to hold the encrypted data.
+ * @brief This class is used to hold the encrypted data.
  */
 struct EncData : public nbc_share::BasicData<helib::Ctxt>
 {

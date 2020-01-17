@@ -99,16 +99,18 @@ start_srv1_async(nbc_ta::CallbackParam& cb_param)
     stdsc::CallbackFunctionContainer callback;
     {
         std::shared_ptr<stdsc::CallbackFunction> cb_pubkey(
-            new nbc_ta::srv1::CallbackFunctionPubkeyRequest(cb_param));
+            new nbc_ta::srv1::CallbackFunctionPubkeyRequest());
         callback.set(nbc_share::kControlCodeDownloadPubkey, cb_pubkey);
         
         std::shared_ptr<stdsc::CallbackFunction> cb_context(
-            new nbc_ta::srv1::CallbackFunctionContextRequest(cb_param));
+            new nbc_ta::srv1::CallbackFunctionContextRequest());
         callback.set(nbc_share::kControlCodeDownloadContext, cb_context);
         
         std::shared_ptr<stdsc::CallbackFunction> cb_result(
-            new nbc_ta::srv1::CallbackFunctionResultRequest(cb_param));
+            new nbc_ta::srv1::CallbackFunctionResultRequest());
         callback.set(nbc_share::kControlCodeUpDownloadResult, cb_result);
+
+        callback.set_commondata(static_cast<void*>(&cb_param), sizeof(cb_param));
     }
 
     std::shared_ptr<nbc_ta::TAServer> server = std::make_shared<nbc_ta::TAServer>(
@@ -126,20 +128,22 @@ start_srv2_async(nbc_ta::CallbackParam& cb_param)
     stdsc::CallbackFunctionContainer callback;
     {
         std::shared_ptr<stdsc::CallbackFunction> cb_session(
-            new nbc_ta::srv2::CallbackFunctionSessionCreate(cb_param));
+            new nbc_ta::srv2::CallbackFunctionSessionCreate());
         callback.set(nbc_share::kControlCodeDownloadSessionID, cb_session);
         
         std::shared_ptr<stdsc::CallbackFunction> cb_begin(
-            new nbc_ta::srv2::CallbackFunctionBeginComputation(cb_param));
+            new nbc_ta::srv2::CallbackFunctionBeginComputation());
         callback.set(nbc_share::kControlCodeDataBeginComputation, cb_begin);
         
         std::shared_ptr<stdsc::CallbackFunction> cb_compute(
-            new nbc_ta::srv2::CallbackFunctionCompute(cb_param));
+            new nbc_ta::srv2::CallbackFunctionCompute());
         callback.set(nbc_share::kControlCodeUpDownloadComputeData, cb_compute);
 
         std::shared_ptr<stdsc::CallbackFunction> cb_end(
-            new nbc_ta::srv2::CallbackFunctionEndComputation(cb_param));
+            new nbc_ta::srv2::CallbackFunctionEndComputation());
         callback.set(nbc_share::kControlCodeDataEndComputation, cb_end);
+
+        callback.set_commondata(static_cast<void*>(&cb_param), sizeof(cb_param));
     }
 
     std::shared_ptr<nbc_ta::TAServer> server = std::make_shared<nbc_ta::TAServer>(

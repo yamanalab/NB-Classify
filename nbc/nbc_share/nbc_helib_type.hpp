@@ -15,38 +15,14 @@
  * limitations under the License.
  */
 
-#ifndef NBC_CONTEXT_HPP
-#define NBC_CONTEXT_HPP
+#ifndef NBC_HELIB_TYPE_HPP
+#define NBC_HELIB_TYPE_HPP
 
-#include <iostream>
-#include <string>
-#include <memory>
-#include <nbc_share/nbc_helib_type.hpp>
-
-namespace nbc_share
+namespace helib
 {
+    using FHEcontext = class Context;
+    using FHEPubKey  = class PubKey;
+    using FHESecKey  = class SecKey;
+}
 
-/**
- * @brief This class is used to hold the context.
- */
-struct Context
-{
-    Context(void);
-    ~Context(void) = default;
-
-    void save_to_stream(std::ostream& os) const;
-    void load_from_stream(std::istream& is);
-
-    void save_to_file(const std::string& filepath) const;
-    void load_from_file(const std::string& filepath);
-
-    const helib::FHEcontext& get(void) const;
-
-private:
-    struct Impl;
-    std::shared_ptr<Impl> pimpl_;
-};
-
-} /* namespace nbc_share */
-
-#endif /* NBC_CONTEXT_HPP */
+#endif /* NBC_HELIB_TYPE_HPP */

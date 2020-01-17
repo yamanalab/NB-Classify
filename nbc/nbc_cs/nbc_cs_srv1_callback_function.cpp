@@ -91,8 +91,10 @@ DEFUN_DOWNLOAD(CallbackFunctionSessionCreate)
 {
     STDSC_LOG_INFO("Received session create. (current state : %s)",
                    state.current_state_str().c_str());
+
+    DEF_CDATA_ON_EACH(nbc_cs::CallbackParam);
     
-    auto& client = param_.get_client();
+    auto& client = cdata_e->get_client();
     auto session_id = client.create_session();
     const size_t size = sizeof(session_id);
     
@@ -110,14 +112,17 @@ DEFUN_DATA(CallbackFunctionEncModel)
     STDSC_LOG_INFO("Received encrypted model. (current state : %s)",
                    state.current_state_str().c_str());
     
+    DEF_CDATA_ON_EACH(nbc_cs::CallbackParam);
+    DEF_CDATA_ON_ALL(nbc_cs::CommonCallbackParam);
+    
     stdsc::BufferStream buffstream(buffer);
     std::iostream stream(&buffstream);
     
-    auto& client = param_.get_client();
+    auto& client = cdata_e->get_client();
 
     std::shared_ptr<nbc_share::EncData> encmodel_ptr(new nbc_share::EncData(client.pubkey()));
     encmodel_ptr->load_from_stream(stream);
-    param_.encmodel_ptr = encmodel_ptr;
+    cdata_a->encmodel_ptr = encmodel_ptr;
 
     state.set(kEventEncModel);
 }
@@ -132,32 +137,34 @@ DEFUN_DATA(CallbackFunctionEncInput)
          kStateComputable     == state.current_state()),
         "Warn: must be SessionCreated or Computable state to receive encrypting input.");
 
+    DEF_CDATA_ON_EACH(nbc_cs::CallbackParam);
+
     stdsc::BufferStream buffstream(buffer);
     std::iostream stream(&buffstream);
 
-    auto& client = param_.get_client();
+    auto& client = cdata_e->get_client();
 
     std::shared_ptr<nbc_share::EncData> encdata_ptr(new nbc_share::EncData(client.pubkey()));
     encdata_ptr->load_from_stream(stream);
-    param_.encdata_ptr = encdata_ptr;
+    cdata_e->encdata_ptr = encdata_ptr;
 
     std::shared_ptr<nbc_share::PermVec> permvec_ptr(new nbc_share::PermVec());
     permvec_ptr->load_from_stream(stream);
-    param_.permvec_ptr = permvec_ptr;
+    cdata_e->permvec_ptr = permvec_ptr;
 
-    encdata_ptr->save_to_file(param_.encdata_filename);
+    encdata_ptr->save_to_file(cdata_e->encdata_filename);
 
     {
         const auto& vec = permvec_ptr->vdata();
-        param_.permvec.resize(vec.size(), -1);
-        std::memcpy(param_.permvec.data(), vec.data(), sizeof(long) * vec.size());
+        cdata_e->permvec.resize(vec.size(), -1);
+        std::memcpy(cdata_e->permvec.data(), vec.data(), sizeof(long) * vec.size());
     }
     
     {        
         std::ostringstream oss;
-        oss << "permvec: sz=" << param_.permvec.size();
+        oss << "permvec: sz=" << cdata_e->permvec.size();
         oss << ", data=";
-        for (auto& v : param_.permvec) oss << " " << v;
+        for (auto& v : cdata_e->permvec) oss << " " << v;
         STDSC_LOG_DEBUG(oss.str().c_str());
     }
     
@@ -174,6 +181,9 @@ DEFUN_DATA(CallbackFunctionComputeRequest)
         kStateComputable == state.current_state(),
         "Warn: must be Computable state to receive compute request.");
 
+    DEF_CDATA_ON_EACH(nbc_cs::CallbackParam);
+    DEF_CDATA_ON_ALL(nbc_cs::CommonCallbackParam);
+    
     stdsc::BufferStream buffstream(buffer);
     std::iostream stream(&buffstream);
     
@@ -189,12 +199,12 @@ DEFUN_DATA(CallbackFunctionComputeRequest)
     STDSC_LOG_INFO("start computing of session#%d. (class_num:%lu, num_features:%lu)",
                    session_id, class_num, num_features);
     
-    auto& client  = param_.get_client();
+    auto& client  = cdata_e->get_client();
     auto& context = client.context();
 
-    auto& ct_data     = param_.encdata_ptr->data();
-    auto& model_ctxts = param_.encmodel_ptr->vdata();
-    auto& permvec     = param_.permvec;
+    auto& ct_data     = cdata_e->encdata_ptr->data();
+    auto& model_ctxts = cdata_a->encmodel_ptr->vdata();
+    auto& permvec     = cdata_e->permvec;
 
     auto& context_data = context.get();
     NTL::ZZX G = context_data.alMod.getFactorsOverZZ()[0];

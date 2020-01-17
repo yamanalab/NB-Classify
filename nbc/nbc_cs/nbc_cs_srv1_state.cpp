@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
 #include <stdsc/stdsc_state.hpp>
 #include <stdsc/stdsc_log.hpp>
 #include <nbc_cs/nbc_cs_srv1_state.hpp>
@@ -34,13 +35,16 @@ struct StateReady::Impl
     void set(stdsc::StateContext& sc, uint64_t event)
     {
         STDSC_LOG_TRACE("StateReady: event#%lu", event);
+
+        bool& s_model_received = StateSessionCreated::s_model_received();
+        
         switch (static_cast<Event_t>(event))
         {
             case kEventEncModel:
-                model_received_ = true;
+                s_model_received = true;
                 break;
             case kEventSessionCreate:
-                sc.next_state(StateSessionCreated::create(model_received_));
+                sc.next_state(StateSessionCreated::create());
                 break;
             default:
                 break;
@@ -52,24 +56,21 @@ private:
 
 struct StateSessionCreated::Impl
 {
-    Impl(const bool model_received,
-         const bool input_received,
+    Impl(const bool input_received,
          const bool permvec_received)
-        : model_received_(model_received),
-          input_received_(input_received),
+        : input_received_(input_received),
           permvec_received_(permvec_received)
     {
     }
 
     void set(stdsc::StateContext& sc, uint64_t event)
     {
+        bool& s_model_received = StateSessionCreated::s_model_received();
+        
         STDSC_LOG_TRACE("SessionCreated: event#%lu, model:%d, input:%d, permvec:%d",
-                        event, model_received_, input_received_, permvec_received_);
+                        event, s_model_received, input_received_, permvec_received_);
         switch (static_cast<Event_t>(event))
         {
-            case kEventEncModel:
-                model_received_ = true;
-                break;
             case kEventEncInput:
                 input_received_ = true;
                 break;
@@ -80,13 +81,18 @@ struct StateSessionCreated::Impl
                 break;
         }
 
-        if (model_received_ && input_received_ && permvec_received_) {
+        if (input_received_ && permvec_received_) {
+            uint32_t times = 0;
+            while (!s_model_received) {
+                STDSC_LOG_DEBUG("waiting for encrypted model received. (times: %u)", times);
+                ++times;
+                usleep(100000);
+            }
             sc.next_state(StateComputable::create());
         }
     }
 
 private:
-    bool model_received_;
     bool input_received_;
     bool permvec_received_;
 };
@@ -106,7 +112,7 @@ struct StateComputable::Impl
                 sc.next_state(StateComputing::create());
                 break;
             case kEventSessionCreate:
-                sc.next_state(StateSessionCreated::create(true, false, true));
+                sc.next_state(StateSessionCreated::create(false, true));
                 break;
             default:
                 break;
@@ -126,7 +132,7 @@ struct StateComputing::Impl
         switch (static_cast<Event_t>(event))
         {
             case kEventSessionCreate:
-                sc.next_state(StateSessionCreated::create(true, false, true));
+                sc.next_state(StateSessionCreated::create(false, true));
                 break;
             default:
                 break;
@@ -153,18 +159,16 @@ void StateReady::set(stdsc::StateContext& sc, uint64_t event)
 
 // SessionCreated
 
-std::shared_ptr<stdsc::State> StateSessionCreated::create(const bool model_received,
-                                                          const bool input_received,
+std::shared_ptr<stdsc::State> StateSessionCreated::create(const bool input_received,
                                                           const bool permvec_received)
 {
     return std::shared_ptr<stdsc::State>(
-        new StateSessionCreated(model_received, input_received, permvec_received));
+        new StateSessionCreated(input_received, permvec_received));
 }
 
-StateSessionCreated::StateSessionCreated(const bool model_received,
-                                         const bool input_received,
+StateSessionCreated::StateSessionCreated(const bool input_received,
                                          const bool permvec_received)
-    : pimpl_(new Impl(model_received, input_received, permvec_received))
+    : pimpl_(new Impl(input_received, permvec_received))
 {
 }
 
