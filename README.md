@@ -9,12 +9,12 @@ The library also provides a program for training your classification model and w
 * glibc 2.23
 * g++ 5.4.0
 * cmake 3.5
-* [HElib](https://github.com/homenc/HElib/tree/1.0.0-beta2-Nov2019) tag: 1.0.0-beta2-Nov2019
+* [HElib v1.0.0](https://github.com/homenc/HElib/tree/v1.0.0)
 * doxygen (to generate documentation)
 * xterm (to run demo app using `demo.sh`)
 
 # How to build
-1. Build and install [HElib](https://github.com/homenc/HElib) according to Option 1 in INSTALL.md with the `-DCMAKE_BUILD_TYPE=Release` option added to Step 2.
+1. Build and install [HElib](https://github.com/homenc/HElib/tree/v1.0.0) according to Option 1 in INSTALL.md with the `-DCMAKE_BUILD_TYPE=Release` option without the `-DCMAKE_INSTALL_PREFIX=...` option (to install to `/usr/local/helib_pack`) added to Step 2.
 2. Run the following commands at the root of NB-Classify library to build the library.
     ```sh
     $ git submodule update -i
@@ -23,7 +23,7 @@ The library also provides a program for training your classification model and w
     $ make
     ```
     if you add the `-DALGO=<algorithm>` option to the cmake command, you can specify the classification algorithm. the following <algorithm> can be specified.
-    * `Single` : compute each data
+    * `Single` : compute each data (Default)
     * `SingleOpt` : compute each data with optimization
     * `Multi` : compute multi data at onece
 
