@@ -1,0 +1,5 @@
+include_directories(${PROJECT_SOURCE_DIR}/demo)
+add_subdirectory(ta)
+add_subdirectory(cs)
+add_subdirectory(mp)
+add_subdirectory(client)

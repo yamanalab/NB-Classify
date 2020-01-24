@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import csv
 import json
 import operator
@@ -27,35 +29,45 @@ def classify (cond_prob, class_prob, dataset):
     return probs
 
 
-print("Input name of data set")
-dataName = input()
-filename = '../datasets/' + dataName + '_test.csv'
-dataset, labels = loadCsv(filename)
-print('Loaded data file {0} with {1} rows'.format(filename, len(dataset)))
+def run(testfile, modelfile, outname):
+    dataset, labels = loadCsv(testfile)
+    print('Loaded data file {0} with {1} rows'.format(testfile, len(dataset)))
+    
+    with open(modelfile, 'r') as f:
+        trained_model = json.load(f)
+    
+    calculated_prob = classify(trained_model['cond_prob'], trained_model['class_prob'], dataset)
+    print("Calculated")
+    print(calculated_prob)
+    
+    classified = []
+    for i in calculated_prob:
+        classified.append(max(i.items(), key=operator.itemgetter(1))[0])
+    
+    print("Classification result")
+    print(classified)
+    print("Actual result")
+    print(labels)
+    
+    positive = 0
+    negative = 0
+    for i in range(len(classified)):
+        if classified[i]==labels[i]:
+            positive += 1
+        else:
+            negative += 1
+    
+    print("True: ", positive)
+    print("False: ", negative)
 
-with open('../datasets/' + dataName + '_model.json', 'r') as f:
-    trained_model = json.load(f)
 
-calculated_prob = classify(trained_model['cond_prob'], trained_model['class_prob'], dataset)
-print("Calculated")
-print(calculated_prob)
+if __name__ == '__main__':
+    import argparse
+    ap = argparse.ArgumentParser(description=u"train")
+    ap.add_argument("-t", "--testfile", help="test filepath")
+    ap.add_argument("-m", "--modelfile", help="model JSON filepath")
+    ap.add_argument("-o", "--outname", default="sample", help="output name")
+    args = ap.parse_args()
 
-classified = []
-for i in calculated_prob:
-    classified.append(max(i.items(), key=operator.itemgetter(1))[0])
+    run(args.testfile, args.modelfile, args.outname)
 
-print("Classification result")
-print(classified)
-print("Actual result")
-print(labels)
-
-positive = 0
-negative = 0
-for i in range(len(classified)):
-    if classified[i]==labels[i]:
-        positive += 1
-    else:
-        negative += 1
-
-print("True: ", positive)
-print("False: ", negative)

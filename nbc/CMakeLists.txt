@@ -1,0 +1,5 @@
+add_subdirectory(nbc_cs)
+add_subdirectory(nbc_ta)
+add_subdirectory(nbc_client)
+add_subdirectory(nbc_share)
+add_subdirectory(nbc_mp)

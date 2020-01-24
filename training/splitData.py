@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import csv
 import random
 
@@ -17,35 +19,45 @@ def splitDataset(dataset, splitRatio):
         trainSet.append(copy.pop(index))
     return [trainSet, copy]
 
-dataName = input()
-filename = '../datasets/'+ dataName + '_data.csv'
-dataset = loadCsv(filename)
-print('Loaded data file {0} with {1} rows'.format(filename, len(dataset)))
 
-splitRatio = 0.67
-train, test = splitDataset(dataset, splitRatio)
-print("Length of training data: {0}".format(len(train)))
-print("Length of test data: {0}".format(len(test)))
+def run(datafile, trainfile, outname):
+    dataset = loadCsv(datafile)
+    print('Loaded data file {0} with {1} rows'.format(datafile, len(dataset)))
+    
+    splitRatio = 0.67
+    train, test = splitDataset(dataset, splitRatio)
+    print("Length of training data: {0}".format(len(train)))
+    print("Length of test data: {0}".format(len(test)))
+    
+    with open(trainfile, 'w') as csvfile:
+        f = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
+    
+        for data in train:
+            temp = []
+            for i in range(len(data)):
+                temp.append(data[i])
+            f.writerow(temp)
+    
+    print("Finished writing out the training dataset")
+    
+    testFilename = outname + '_test.csv'
+    with open(testFilename, 'w') as csvfile:
+        f = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
+    
+        for data in test:
+            temp = []
+            for i in range(len(data)):
+                temp.append(data[i])
+            f.writerow(temp)
+    print("Finished writing out the test dataset")
 
-trainFilename = '../datasets/' + dataName + '_train.csv'
-with open(trainFilename, 'w') as csvfile:
-    f = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
+if __name__ == '__main__':
+    import argparse
+    ap = argparse.ArgumentParser(description=u"train")
+    ap.add_argument("-d", "--datafile", help="data filepath")
+    ap.add_argument("-t", "--trainfile", help="train filepath")
+    ap.add_argument("-o", "--outname", default="sample", help="output name")
+    args = ap.parse_args()
 
-    for data in train:
-        temp = []
-        for i in range(len(data)):
-            temp.append(data[i])
-        f.writerow(temp)
+    run(args.datafile, args.trainfile, args.outname)
 
-print("Finished writing out the training dataset")
-
-testFilename = '../datasets/' + dataName + '_test.csv'
-with open(testFilename, 'w') as csvfile:
-    f = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
-
-    for data in test:
-        temp = []
-        for i in range(len(data)):
-            temp.append(data[i])
-        f.writerow(temp)
-print("Finished writing out the test dataset")
